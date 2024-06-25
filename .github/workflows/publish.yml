@@ -94,8 +94,8 @@ jobs:
       - name: Publish with Gradle
         run: ./gradlew publish
         env:
-          USERNAME: ${{ secrets.USERNAME }}
-          PASSWORD: ${{ secrets.PASSWORD }}
+          ORG_GRADLE_PROJECT_ossrhUsername: ${{ secrets.USERNAME }}
+          ORG_GRADLE_PROJECT_ossrhPassword: ${{ secrets.PASSWORD }}
           ORG_GRADLE_PROJECT_signingKey: ${{ secrets.GPG_SIGNING_KEY }}
           ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.GPG_SIGNING_PASSWORD }}
       - name: Build with Gradle
