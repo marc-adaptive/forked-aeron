@@ -70,8 +70,8 @@ def gitCommitHash = io.aeron.build.GithubUtil.currentGitHash("${projectDir}")
 
 ext {
     isReleaseVersion = !aeronVersion.endsWith('-SNAPSHOT')
-    releasesRepoUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
-    snapshotsRepoUrl = 'https://oss.sonatype.org/content/repositories/snapshots/'
+    releasesRepoUrl = 'http://localhost:8081/artifactory/test-maven-repo/'
+    snapshotsRepoUrl = 'http://localhost:8081/artifactory/test-maven-repo/'
 
     if (!project.hasProperty('ossrhUsername')) {
         ossrhUsername = ''

@@ -33,7 +33,7 @@ jobs:
   tag-release:
     permissions:
       contents: write
-    runs-on: [ 'ubuntu-22.04' ]
+    runs-on: [ self-hosted ]
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -55,7 +55,7 @@ jobs:
       contents: write
       packages: write
     needs: tag-release
-    runs-on: ${{ matrix.os }}
+    runs-on: [ self-hosted ]
     strategy:
       fail-fast: false
       matrix:
@@ -94,18 +94,18 @@ jobs:
       - name: Publish with Gradle
         run: ./gradlew publish
         env:
-          ORG_GRADLE_PROJECT_ossrhUsername: ${{ secrets.USERNAME }}
-          ORG_GRADLE_PROJECT_ossrhPassword: ${{ secrets.PASSWORD }}
-          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.GPG_SIGNING_KEY }}
-          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.GPG_SIGNING_PASSWORD }}
-      - name: Build with Gradle
-        run: ./gradlew tutorialPublish -Paeron.ci.apiKey=${{ secrets.WIKI_PAGE_TOKEN }} --stacktrace
+          ORG_GRADLE_PROJECT_ossrhUsername: ${{ secrets.ossrhUsername }}
+          ORG_GRADLE_PROJECT_ossrhPassword: ${{ secrets.ossrhPassword }}
+          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.signingKey }}
+          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.signingPassword }}
+#      - name: Build with Gradle
+#        run: ./gradlew tutorialPublish -Paeron.ci.apiKey=${{ secrets.WIKI_PAGE_TOKEN }} --stacktrace
 
   update-tags:
     permissions:
       contents: write
     needs: java-build
-    runs-on: [ 'ubuntu-22.04' ]
+    runs-on: [ self-hosted ]
     steps:
       - name: checkout
         uses: actions/checkout@v4
