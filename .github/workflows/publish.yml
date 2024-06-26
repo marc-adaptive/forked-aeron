@@ -45,7 +45,7 @@ jobs:
           git commit -m "${{ inputs.tagged-version }} released."
           git tag -f ${{ inputs.tagged-version }}
           git push
-          git push refs/tags/${{ inputs.tagged-version }}
+          git push origin refs/tags/${{ inputs.tagged-version }}
 
 
   java-build:
