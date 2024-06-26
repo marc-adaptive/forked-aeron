@@ -33,8 +33,6 @@ jobs:
       - name: checkout
         if: ${{ inputs.release }}
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref }}
         run: |
           ${{ inputs.tagged-version }} > version.txt
           git config user.name "github-actions"
@@ -45,6 +43,8 @@ jobs:
           git tag -f ${{ inputs.tagged-version }}
           git push
           git push refs/tags/${{ inputs.tagged-version }}
+        with:
+          ref: ${{ github.ref }}
 
   java-build:
     name: Publish Release Documentation
@@ -94,8 +94,6 @@ jobs:
       - name: checkout
         if: ${{ inputs.release }}
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref }}
         run: |
           ${{ inputs.new-version }} > version.txt
           git config user.name "github-actions"
@@ -104,3 +102,5 @@ jobs:
           git status
           git commit -m "${{ inputs.tagged-version }} released."
           git push
+        with:
+          ref: ${{ github.ref }}
