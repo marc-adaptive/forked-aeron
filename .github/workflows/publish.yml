@@ -95,6 +95,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
+      - name: confirm-version
+        run: cat version.txt
       - name: Update master
         if: ${{ inputs.release }}
         run: |
