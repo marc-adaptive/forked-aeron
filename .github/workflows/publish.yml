@@ -31,21 +31,20 @@ jobs:
     runs-on: [ self-hosted ]
     steps:
       - name: checkout
+        if: ${{ inputs.release }}
         uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
-      - name: confirm-version
-        run: cat version.txt
-      - name: Push Tag
-        id: commit-tag
-        if: ${{ inputs.release }}
         run: |
-          echo ${{ inputs.tagged-version }} > version.txt
+          ${{ inputs.tagged-version }} > version.txt
+          git config user.name "github-actions"
+          git config user.email "github-actions"
           git add version.txt
           git status
           git commit -m "${{ inputs.tagged-version }} released."
           git tag -f ${{ inputs.tagged-version }}
-          git push origin HEAD refs/tags/${{ inputs.tagged-version }}
+          git push
+          git push refs/tags/${{ inputs.tagged-version }}
 
   java-build:
     name: Publish Release Documentation
@@ -93,16 +92,15 @@ jobs:
     runs-on: [ self-hosted ]
     steps:
       - name: checkout
+        if: ${{ inputs.release }}
         uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
-      - name: confirm-version
-        run: cat version.txt
-      - name: Update master
-        if: ${{ inputs.release }}
         run: |
-          echo ${{ inputs.new-version }} > version.txt
+          ${{ inputs.new-version }} > version.txt
+          git config user.name "github-actions"
+          git config user.email "github-actions"
           git add version.txt
           git status
-          git commit -m "post ${{ inputs.tag }} release bump"
-          git push origin HEAD
+          git commit -m "${{ inputs.tagged-version }} released."
+          git push
