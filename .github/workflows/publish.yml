@@ -41,8 +41,9 @@ jobs:
         if: ${{ inputs.release }}
         run: |
           echo ${{ inputs.tagged-version }} > version.txt
+          git add version.txt
           git status
-          git commit -am "${{ inputs.tagged-version }} released."
+          git commit -m "${{ inputs.tagged-version }} released."
           git tag -f ${{ inputs.tagged-version }}
           git push origin HEAD refs/tags/${{ inputs.tagged-version }}
 
@@ -101,6 +102,7 @@ jobs:
         if: ${{ inputs.release }}
         run: |
           echo ${{ inputs.new-version }} > version.txt
+          git add version.txt
           git status
-          git commit -am "post ${{ inputs.tag }} release bump"
+          git commit -m "post ${{ inputs.tag }} release bump"
           git push origin HEAD
