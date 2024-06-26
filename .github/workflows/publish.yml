@@ -37,14 +37,14 @@ jobs:
       - name: update-tag
         if: ${{ inputs.release }}
         run: |
-          echo ${{ inputs.tagged-version }} > version.txt
           git config user.name "github-actions"
           git config user.email "github-actions"
+          echo ${{ inputs.tagged-version }} > version.txt
           git add version.txt
           git status
           git commit -m "${{ inputs.tagged-version }} released."
           git tag -f ${{ inputs.tagged-version }}
-          git push
+          git push 
           git push origin refs/tags/${{ inputs.tagged-version }}
 
 
@@ -100,9 +100,9 @@ jobs:
       - name: update-tag
         if: ${{ inputs.release }}
         run: |
-          echo ${{ inputs.new-version }} > version.txt
           git config user.name "github-actions"
           git config user.email "github-actions"
+          echo ${{ inputs.new-version }} > version.txt
           git add version.txt
           git status
           git commit -m "${{ inputs.tagged-version }} released."
