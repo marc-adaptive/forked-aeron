@@ -8,6 +8,7 @@ RUN yum update -y && yum install -y https://cdn.azul.com/zulu/bin/zulu-repo-1.0.
     gcc \
     gcc-c++ \
     make \
+    tar \
     zlib-devel \
 #    libbsd-devel \
     libuuid-devel \
@@ -20,8 +21,9 @@ ENV JAVA_HOME=/usr/lib/jvm/zulu-8 \
     BUILD_JAVA_VERSION=8 \
     GRADLE_OPTS="-Dorg.gradle.daemon=false -Dorg.gradle.java.installations.auto-detect=false -Dorg.gradle.warning.mode=fail"
 
-RUN groupadd --gid $GROUP_ID --non-unique athena
-RUN adduser --uid $USER_ID --gid $GROUP_ID athena
+#RUN groupadd --gid $GROUP_ID --non-unique athena
+#RUN adduser --uid $USER_ID --gid $GROUP_ID athena
+RUN adduser athena
 USER athena
 
 WORKDIR /opt/aeron

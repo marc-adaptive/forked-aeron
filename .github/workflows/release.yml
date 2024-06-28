@@ -90,7 +90,7 @@ jobs:
 #      - name: Build with Gradle
 #        run: ./gradlew tutorialPublish -Paeron.ci.apiKey=${{ secrets.WIKI_PAGE_TOKEN }} --stacktrace
 
-  publish-c:
+  c-build:
     name: Publish c artifacts to jfrog
     permissions:
       contents: read
@@ -143,7 +143,7 @@ jobs:
   update-next-version:
     permissions:
       contents: write
-    needs: java-build
+    needs: [ java-build, c-build ]
     runs-on: [ self-hosted ]
     steps:
       - name: checkout

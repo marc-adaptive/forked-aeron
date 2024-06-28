@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
     make \
+    tar \
     zlib1g-dev \
     libbsd-dev \
     uuid-dev \
@@ -25,8 +26,9 @@ ENV JAVA_HOME=/usr/lib/jvm/zulu8 \
     BUILD_JAVA_VERSION=8 \
     GRADLE_OPTS="-Dorg.gradle.daemon=false -Dorg.gradle.java.installations.auto-detect=false -Dorg.gradle.warning.mode=fail"
 
-RUN groupadd --gid $GROUP_ID --non-unique athena
-RUN adduser --uid $USER_ID --gid $GROUP_ID athena
+#RUN groupadd --gid $GROUP_ID --non-unique athena
+#RUN adduser --uid $USER_ID --gid $GROUP_ID athena
+RUN adduser athena
 USER athena
 
 WORKDIR /opt/aeron

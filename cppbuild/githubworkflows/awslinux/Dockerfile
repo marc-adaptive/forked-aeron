@@ -9,6 +9,7 @@ RUN yum update && yum install -y https://cdn.azul.com/zulu/bin/zulu-repo-1.0.0-1
     gcc \
     g++ \
     make \
+    tar \
     zlib-devel \
     libbsd-devel \
     libuuid-devel \
