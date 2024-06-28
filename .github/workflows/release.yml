@@ -25,7 +25,7 @@ env:
   GRADLE_OPTS: '-Dorg.gradle.daemon=false -Dorg.gradle.java.installations.auto-detect=false -Dorg.gradle.warning.mode=fail'
   JF_URL: 'http://localhost:8081'
   OIDC_PROVIDER: 'github'
-  OIDC_AUDIENCE: 'jfrog-github'
+  OIDC_AUDIENCE: 'github-workflows'
 
 jobs:
   tag-release:
