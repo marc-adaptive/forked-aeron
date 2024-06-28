@@ -137,7 +137,7 @@ jobs:
           oidc-provider-name: ${{ env.OIDC_PROVIDER }}
           oidc-audience: ${{ env.OIDC_AUDIENCE }}
       - name: Publish Build info With JFrog CLI
-        run: jf rt u *.tar.gz ${{ inputs.release && 'test-generic-repo/' || 'test-generic-repo/' }}
+        run: jf rt u *.tar.gz ${{ inputs.release && 'generic-local/' || 'generic-local/' }}
         working-directory: ./build/${{ matrix.distro }}/${{ matrix.version }}
 
   update-next-version:
