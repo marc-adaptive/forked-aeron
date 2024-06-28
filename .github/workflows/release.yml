@@ -23,6 +23,9 @@ concurrency:
 
 env:
   GRADLE_OPTS: '-Dorg.gradle.daemon=false -Dorg.gradle.java.installations.auto-detect=false -Dorg.gradle.warning.mode=fail'
+  JF_URL: 'https://weareadaptive.jfrog.io'
+  OIDC_PROVIDER: 'github'
+  OIDC_AUDIENCE: 'jfrog-github'
 
 jobs:
   tag-release:
@@ -86,6 +89,56 @@ jobs:
           ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.signingPassword }}
 #      - name: Build with Gradle
 #        run: ./gradlew tutorialPublish -Paeron.ci.apiKey=${{ secrets.WIKI_PAGE_TOKEN }} --stacktrace
+
+  publish-c:
+    name: Publish c artifacts to jfrog
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    needs: tag-release
+    runs-on: [ self-hosted ]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - distro: ubuntu
+            version: 20.04
+          - distro: debian
+            version: bullseye
+          - distro: debian
+            version: bookworm
+          - distro: rocky
+            version: 2023
+          - distro: awslinux
+            version: 2023
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build Artifacts Using Docker
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./cppbuild/githubworkflows/${{ matrix.distro }}/Dockerfile
+          pull: true
+          shm-size: 1g
+          outputs: build/${{ matrix.distro }}/${{ matrix.version }}
+          target: essentials-artifacts
+          build-args: VERSION=${{ matrix.version }}
+      - name: Setup JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v4
+        with:
+          oidc-provider-name: ${{ env.OIDC_PROVIDER }}
+          oidc-audience: ${{ env.OIDC_AUDIENCE }}
+      - name: Publish Build info With JFrog CLI
+        run: jf rt u *.tar.gz ${{ inputs.release && 'test-generic-repo/' || 'test-generic-repo/' }}
+        working-directory: ./build/${{ matrix.distro }}/${{ matrix.version }}
 
   update-next-version:
     permissions:
