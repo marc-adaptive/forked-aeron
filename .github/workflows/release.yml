@@ -37,9 +37,9 @@ jobs:
     with:
       release: ${{ inputs.release }}
       pre-build: true
-      major-version: ${{ inputs.major-version }}
-      minor-version: ${{ inputs.minor-version }}
-      patch-version: ${{ inputs.patch-version }}
+      major-version: ${{ fromJson(inputs.major-version) }}
+      minor-version: ${{ fromJson(inputs.minor-version) }}
+      patch-version: ${{ fromJson(inputs.patch-version) }}
 
 #  java-build:
 #    name: Publish Java Artifacts
