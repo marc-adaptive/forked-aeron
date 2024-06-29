@@ -37,105 +37,105 @@ jobs:
     with:
       release: ${{ inputs.release }}
       pre-build: true
-      major-version: ${{ inputs.major-version }}
-      minor-version: ${{ inputs.minor-version }}
-      patch-version: ${{ inputs.patch-version }}
+      major-version: 1
+      minor-version: 1
+      patch-version: 6
 
-  java-build:
-    name: Publish Java Artifacts
-    permissions:
-      contents: write
-      packages: write
-    needs: pre-build
-    runs-on: [ self-hosted ]
-    strategy:
-      fail-fast: false
-      matrix:
-        java: [ '8' ]
-        os: ['ubuntu-22.04' ]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.pre-build.outputs.sha }}
-      - name: confirm-version
-        run: cat version.txt
-      - name: Setup java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: ${{ matrix.java }}
-      - name: Setup BUILD_JAVA_HOME & BUILD_JAVA_VERSION
-        run: |
-          java -Xinternalversion
-          echo "BUILD_JAVA_HOME=${JAVA_HOME}" >> $GITHUB_ENV
-          echo "BUILD_JAVA_VERSION=8" >> $GITHUB_ENV
-      - name: Publish with Gradle
-        run: ./gradlew publish
-        env:
-          ORG_GRADLE_PROJECT_ossrhUsername: ${{ secrets.ossrhUsername }}
-          ORG_GRADLE_PROJECT_ossrhPassword: ${{ secrets.ossrhPassword }}
-          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.signingKey }}
-          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.signingPassword }}
-#      - name: Build with Gradle
-#        run: ./gradlew tutorialPublish -Paeron.ci.apiKey=${{ secrets.WIKI_PAGE_TOKEN }} --stacktrace
-
-  c-build:
-    name: Publish C Artifacts
-    permissions:
-      contents: read
-      id-token: write
-      packages: write
-    needs: pre-build
-    runs-on: [ self-hosted ]
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - distro: ubuntu
-            version: 20.04
-          - distro: debian
-            version: bullseye
-          - distro: debian
-            version: bookworm
-          - distro: rocky
-            version: 2023
-          - distro: awslinux
-            version: 2023
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.pre-build.outputs.sha }}
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      - name: Build Artifacts Using Docker
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./cppbuild/githubworkflows/${{ matrix.distro }}/Dockerfile
-          pull: true
-          shm-size: 1g
-          outputs: build/${{ matrix.distro }}/${{ matrix.version }}
-          target: essentials-artifacts
-          build-args: VERSION=${{ matrix.version }}
-      - name: Setup JFrog CLI
-        uses: jfrog/setup-jfrog-cli@v4
-        with:
-          oidc-provider-name: ${{ env.OIDC_PROVIDER }}
-          oidc-audience: ${{ env.OIDC_AUDIENCE }}
-      - name: Publish Build info With JFrog CLI
-        run: jf rt u *.tar.gz ${{ inputs.release && 'generic-local/' || 'generic-local/' }}
-        working-directory: ./build/${{ matrix.distro }}/${{ matrix.version }}
-
-  post-build:
-    uses: ./.github/workflows/manage-version.yml
-    needs: [ java-build, c-build ]
-    with:
-      release: ${{ inputs.release }}
-      pre-build: false
-      major-version: ${{ inputs.major-version }}
-      minor-version: ${{ inputs.minor-version }}
-      patch-version: ${{ inputs.patch-version }}
+#  java-build:
+#    name: Publish Java Artifacts
+#    permissions:
+#      contents: write
+#      packages: write
+#    needs: pre-build
+#    runs-on: [ self-hosted ]
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        java: [ '8' ]
+#        os: ['ubuntu-22.04' ]
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v4
+#        with:
+#          ref: ${{ needs.pre-build.outputs.sha }}
+#      - name: confirm-version
+#        run: cat version.txt
+#      - name: Setup java
+#        uses: actions/setup-java@v4
+#        with:
+#          distribution: 'zulu'
+#          java-version: ${{ matrix.java }}
+#      - name: Setup BUILD_JAVA_HOME & BUILD_JAVA_VERSION
+#        run: |
+#          java -Xinternalversion
+#          echo "BUILD_JAVA_HOME=${JAVA_HOME}" >> $GITHUB_ENV
+#          echo "BUILD_JAVA_VERSION=8" >> $GITHUB_ENV
+#      - name: Publish with Gradle
+#        run: ./gradlew publish
+#        env:
+#          ORG_GRADLE_PROJECT_ossrhUsername: ${{ secrets.ossrhUsername }}
+#          ORG_GRADLE_PROJECT_ossrhPassword: ${{ secrets.ossrhPassword }}
+#          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.signingKey }}
+#          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.signingPassword }}
+##      - name: Build with Gradle
+##        run: ./gradlew tutorialPublish -Paeron.ci.apiKey=${{ secrets.WIKI_PAGE_TOKEN }} --stacktrace
+#
+#  c-build:
+#    name: Publish C Artifacts
+#    permissions:
+#      contents: read
+#      id-token: write
+#      packages: write
+#    needs: pre-build
+#    runs-on: [ self-hosted ]
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        include:
+#          - distro: ubuntu
+#            version: 20.04
+#          - distro: debian
+#            version: bullseye
+#          - distro: debian
+#            version: bookworm
+#          - distro: rocky
+#            version: 2023
+#          - distro: awslinux
+#            version: 2023
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v4
+#        with:
+#          ref: ${{ needs.pre-build.outputs.sha }}
+#      - name: Set up QEMU
+#        uses: docker/setup-qemu-action@v3
+#      - name: Set up Docker Buildx
+#        uses: docker/setup-buildx-action@v3
+#      - name: Build Artifacts Using Docker
+#        uses: docker/build-push-action@v5
+#        with:
+#          context: .
+#          file: ./cppbuild/githubworkflows/${{ matrix.distro }}/Dockerfile
+#          pull: true
+#          shm-size: 1g
+#          outputs: build/${{ matrix.distro }}/${{ matrix.version }}
+#          target: essentials-artifacts
+#          build-args: VERSION=${{ matrix.version }}
+#      - name: Setup JFrog CLI
+#        uses: jfrog/setup-jfrog-cli@v4
+#        with:
+#          oidc-provider-name: ${{ env.OIDC_PROVIDER }}
+#          oidc-audience: ${{ env.OIDC_AUDIENCE }}
+#      - name: Publish Build info With JFrog CLI
+#        run: jf rt u *.tar.gz ${{ inputs.release && 'generic-local/' || 'generic-local/' }}
+#        working-directory: ./build/${{ matrix.distro }}/${{ matrix.version }}
+#
+#  post-build:
+#    uses: ./.github/workflows/manage-version.yml
+#    needs: [ java-build, c-build ]
+#    with:
+#      release: ${{ inputs.release }}
+#      pre-build: false
+#      major-version: ${{ inputs.major-version }}
+#      minor-version: ${{ inputs.minor-version }}
+#      patch-version: ${{ inputs.patch-version }}
