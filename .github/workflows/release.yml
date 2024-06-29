@@ -57,7 +57,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ pre-build.outputs.sha }}
+          ref: ${{ jobs.pre-build.outputs.sha }}
       - name: confirm-version
         run: cat version.txt
       - name: Setup java
