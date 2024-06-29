@@ -3,6 +3,10 @@ name: Publish Artifacts and Release Documentation
 on:
   workflow_dispatch:
     inputs:
+      run-ci:
+        description: Run ci and test workflows
+        required: true
+        type: boolean
       release:
         description: Is release? (Will update master version.txt)
         required: true
@@ -32,12 +36,20 @@ env:
   OIDC_AUDIENCE: 'github-workflows'
 
 jobs:
+  run-release-ci:
+    name: Run ci workflows
+    uses: ./.github/workflows/release-ci.yml
+    with:
+      run-ci: ${{ inputs.run-ci }}
+      run-ci-low-cadence: ${{ inputs.run-ci }}
+      codeql: ${{ inputs.run-ci }}
+
   pre-build:
+    needs: run-release-ci
     uses: ./.github/workflows/manage-version.yml
     with:
       release: ${{ inputs.release }}
       pre-build: true
-      #https://github.com/orgs/community/discussions/67182
       major-version: ${{ fromJson(inputs.major-version) }}
       minor-version: ${{ fromJson(inputs.minor-version) }}
       patch-version: ${{ fromJson(inputs.patch-version) }}
