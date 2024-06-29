@@ -359,10 +359,24 @@ endif ()
 ##########################################################
 # package target
 
+execute_process(
+        COMMAND grep --color=never -e "^ID=" /etc/os-release
+        COMMAND cut -d= -f2
+        COMMAND xargs
+        OUTPUT_VARIABLE OS_RELEASE_ID
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+execute_process(
+        COMMAND grep --color=never -e "^VERSION_ID=" /etc/os-release
+        COMMAND cut -d= -f2
+        COMMAND xargs
+        OUTPUT_VARIABLE OS_RELEASE_VERSION_ID
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 set(CPACK_PACKAGE_VERSION_MAJOR "${aeron_VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR "${aeron_VERSION_MINOR}")
 set(CPACK_PACKAGE_VERSION_PATCH "${aeron_VERSION_PATCH}")
-
+set(CPACK_PACKAGE_FILE_NAME "aeron-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-${OS_RELEASE_ID}-${OS_RELEASE_VERSION_ID}-${CMAKE_HOST_SYSTEM_PROCESSOR}")
 set(CPACK_GENERATOR "TGZ;STGZ")
 include(CPack)
