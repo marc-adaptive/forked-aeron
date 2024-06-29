@@ -8,14 +8,18 @@ on:
         required: true
         default: false
         type: boolean
-      tagged-version:
-        description: Release Version (For tagged version.txt)
+      major-version:
+        description: Major release version
         required: true
-        type: string
-      new-version:
-        description: New Version (For master version.txt)
+        type: number
+      minor-version:
+        description: Minor release version
         required: true
-        type: string
+        type: number
+      patch-version:
+        description: Patch release version
+        required: true
+        type: number
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -28,35 +32,21 @@ env:
   OIDC_AUDIENCE: 'github-workflows'
 
 jobs:
-  tag-release:
-    permissions:
-      contents: write
-    runs-on: [ self-hosted ]
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref }}
-      - name: update-tag
-        if: ${{ inputs.release }}
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions"
-          echo ${{ inputs.tagged-version }} > version.txt
-          git add version.txt
-          git status
-          git commit -m "${{ inputs.tagged-version }} released."
-          git tag -f ${{ inputs.tagged-version }}
-          git push 
-          git push origin refs/tags/${{ inputs.tagged-version }}
-
+  pre-build:
+    uses: ./.github/workflows/manage-version.yml
+    with:
+      release: ${{ inputs.release }}
+      pre-build: true
+      major-version: ${{ inputs.major-version }}
+      minor-version: ${{ inputs.minor-version }}
+      patch-version: ${{ inputs.patch-version }}
 
   java-build:
-    name: Publish Release Documentation
+    name: Publish Java Artifacts
     permissions:
       contents: write
       packages: write
-    needs: tag-release
+    needs: pre-build
     runs-on: [ self-hosted ]
     strategy:
       fail-fast: false
@@ -67,7 +57,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref }}
+          ref: ${{ pre-build.outputs.sha }}
       - name: confirm-version
         run: cat version.txt
       - name: Setup java
@@ -91,12 +81,12 @@ jobs:
 #        run: ./gradlew tutorialPublish -Paeron.ci.apiKey=${{ secrets.WIKI_PAGE_TOKEN }} --stacktrace
 
   c-build:
-    name: Publish c artifacts to jfrog
+    name: Publish C Artifacts
     permissions:
       contents: read
       id-token: write
       packages: write
-    needs: tag-release
+    needs: pre-build
     runs-on: [ self-hosted ]
     strategy:
       fail-fast: false
@@ -116,7 +106,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref }}
+          ref: ${{ pre-build.outputs.sha }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -140,23 +130,12 @@ jobs:
         run: jf rt u *.tar.gz ${{ inputs.release && 'generic-local/' || 'generic-local/' }}
         working-directory: ./build/${{ matrix.distro }}/${{ matrix.version }}
 
-  update-next-version:
-    permissions:
-      contents: write
+  post-build:
+    uses: ./.github/workflows/manage-version.yml
     needs: [ java-build, c-build ]
-    runs-on: [ self-hosted ]
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref }}
-      - name: update-tag
-        if: ${{ inputs.release }}
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions"
-          echo ${{ inputs.new-version }} > version.txt
-          git add version.txt
-          git status
-          git commit -m "${{ inputs.tagged-version }} released."
-          git push
+    with:
+      release: ${{ inputs.release }}
+      pre-build: false
+      major-version: ${{ inputs.major-version }}
+      minor-version: ${{ inputs.minor-version }}
+      patch-version: ${{ inputs.patch-version }}
