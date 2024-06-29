@@ -35,7 +35,7 @@ jobs:
     name: Used to update version, tag repo, and return sha
     runs-on: self-hosted
     outputs:
-      sha: ${{ steps.return-sha.sha }}
+      sha: ${{ steps.return-sha.outputs.sha }}
     steps:
       - name: Checkout
         id: checkout
