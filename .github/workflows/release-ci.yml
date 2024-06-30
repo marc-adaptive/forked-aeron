@@ -42,7 +42,7 @@ jobs:
       - run: echo CI Low Cadence Skipped
 
   codeql:
-    uses: ./github/workflows/codeql.yml
+    uses: ./.github/workflows/codeql.yml
     if: ${{ inputs.codeql }}
 
   codeql-skipped:
