@@ -8,7 +8,7 @@ on:
         required: true
         type: boolean
       release:
-        description: Is release? (Will update master version.txt)
+        description: Is release? (Will update tags and version)
         required: true
         default: false
         type: boolean
