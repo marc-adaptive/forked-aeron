@@ -1,6 +1,7 @@
 name: "CodeQL"
 
 on:
+  workflow_call:
   workflow_dispatch:
   repository_dispatch:
     types: run-commit-tests
