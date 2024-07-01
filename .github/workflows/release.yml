@@ -81,7 +81,7 @@ jobs:
 #        run: ./gradlew tutorialPublish -Paeron.ci.apiKey=${{ secrets.WIKI_PAGE_TOKEN }} --stacktrace
 
   release-c:
-    name: Release java artifacts
+    name: Release c artifacts
     permissions:
       contents: write
       id-token: write
@@ -128,7 +128,7 @@ jobs:
           oidc-audience: ${{ env.OIDC_AUDIENCE }}
       - name: Publish Build info With JFrog CLI
         run: |
-          mv *.tar.gz aeron-$(cat version.txt)-${{ matrix.distro }}-${{ matrix.version }}.tar.gz
+          mv *.tar.gz aeron-${{ needs.pre-release.outputs.versio }}-${{ matrix.distro }}-${{ matrix.version }}.tar.gz
           jf rt u *.tar.gz ${{ inputs.release && 'generic-local/' || 'generic-local/' }}
         working-directory: ./build/${{ matrix.distro }}/${{ matrix.version }}
 

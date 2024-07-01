@@ -13,6 +13,9 @@ on:
       sha:
         description: Current SHA after version update
         value: ${{ jobs.pre-publish.outputs.sha }}
+      version:
+        description: Current version after version update
+        value: ${{ jobs.pre-publish.outputs.version }}
 
 permissions:
   contents: write
@@ -22,7 +25,8 @@ jobs:
     name: Update version, tag repo, and return sha
     runs-on: self-hosted
     outputs:
-      sha: ${{ steps.return-sha.outputs.sha }}
+      sha: ${{ steps.return-details.outputs.sha }}
+      version: ${{ steps.return-details.outputs.version }}
     steps:
       - id: checkout
         name: Checkout
@@ -46,8 +50,9 @@ jobs:
         run: |
           git tag ${{ inputs.version }}
           git push origin refs/tags/${{ inputs.version }}
-      - id: return-sha
-        name: Return current SHA
+      - id: return-details
+        name: Return current SHA and version
         run: |
           git rev-parse HEAD
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "version=$(cat version.txt)" >> "$GITHUB_OUTPUT"
