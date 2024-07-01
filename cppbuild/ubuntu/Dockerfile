@@ -1,8 +1,5 @@
-ARG USER_ID="1000"
-ARG GROUP_ID="1000"
-ARG VERSION="bookworm"
-
-FROM debian:${VERSION} as builder
+ARG VERSION="22.04"
+FROM ubuntu:${VERSION} as builder
 
 RUN apt-get update && apt-get install -y \
     gcc \
@@ -26,16 +23,11 @@ ENV JAVA_HOME=/usr/lib/jvm/zulu8 \
     BUILD_JAVA_VERSION=8 \
     GRADLE_OPTS="-Dorg.gradle.daemon=false -Dorg.gradle.java.installations.auto-detect=false -Dorg.gradle.warning.mode=fail"
 
-#RUN groupadd --gid $GROUP_ID --non-unique athena
-#RUN adduser --uid $USER_ID --gid $GROUP_ID athena
-RUN adduser athena
-USER athena
-
 WORKDIR /opt/aeron
-ADD --chown=athena:athena ../../.. /opt/aeron
+ADD ../.. /opt/aeron
 
-RUN git config --global user.email "build@aeron.io"
-RUN git config --global user.name "Athena (Build Master)"
+RUN git config --global user.name "github-actions"
+RUN git config --global user.email "github-actions@aeron.io"
 RUN git config --global core.autocrlf false
 RUN git update-index -q --refresh
 
@@ -44,3 +36,4 @@ RUN cppbuild/cppbuild --c-warnings-as-errors --cxx-warnings-as-errors --package
 
 FROM scratch AS essentials-artifacts
 COPY --from=essentials-build /opt/aeron/cppbuild/Release/*.tar.gz /
+
