@@ -94,6 +94,8 @@ jobs:
         include:
           - distro: ubuntu
             version: 20.04
+          - distro: ubuntu
+            version: 22.04
           - distro: debian
             version: bullseye
           - distro: debian
