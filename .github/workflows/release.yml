@@ -12,22 +12,18 @@ on:
         required: true
         default: false
         type: boolean
-      major-version:
-        description: Major release version
+      release-version:
+        description: Released version (x.y.z)
         required: true
-        type: number
-      minor-version:
-        description: Minor release version
+        type: string
+      next-version:
+        description: Next version (x.y.z)
         required: true
-        type: number
-      patch-version:
-        description: Patch release version
-        required: true
-        type: number
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   GRADLE_OPTS: '-Dorg.gradle.daemon=false -Dorg.gradle.java.installations.auto-detect=false -Dorg.gradle.warning.mode=fail'
@@ -38,34 +34,32 @@ env:
 jobs:
   run-release-ci:
     name: Run ci workflows
-    uses: ./.github/workflows/release-ci.yml
+    uses: ./.github/workflows/pre-release-ci.yml
     with:
       run-ci: ${{ inputs.run-ci }}
       run-ci-low-cadence: ${{ inputs.run-ci }}
       codeql: ${{ inputs.run-ci }}
 
-  pre-build:
+  pre-release:
+    name: Update version, tag repo, and return sha
     needs: run-release-ci
-    uses: ./.github/workflows/manage-version.yml
+    uses: ./.github/workflows/pre-release.yml
     with:
       release: ${{ inputs.release }}
-      pre-build: true
-      major-version: ${{ fromJson(inputs.major-version) }}
-      minor-version: ${{ fromJson(inputs.minor-version) }}
-      patch-version: ${{ fromJson(inputs.patch-version) }}
+      version: ${{ inputs.release-version }}
 
-  java-build:
-    name: Publish Java Artifacts
+  release-java:
+    name: Release java artifacts
     permissions:
       contents: write
       packages: write
-    needs: pre-build
+    needs: pre-release
     runs-on: [ self-hosted ]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.pre-build.outputs.sha }}
+          ref: ${{ needs.pre-release.outputs.sha }}
       - name: Setup java
         uses: actions/setup-java@v4
         with:
@@ -86,13 +80,13 @@ jobs:
 #      - name: Build with Gradle
 #        run: ./gradlew tutorialPublish -Paeron.ci.apiKey=${{ secrets.WIKI_PAGE_TOKEN }} --stacktrace
 
-  c-build:
-    name: Publish C Artifacts
+  release-c:
+    name: Release java artifacts
     permissions:
-      contents: read
+      contents: write
       id-token: write
       packages: write
-    needs: pre-build
+    needs: pre-release
     runs-on: [ self-hosted ]
     strategy:
       fail-fast: false
@@ -105,14 +99,14 @@ jobs:
           - distro: debian
             version: bookworm
           - distro: rocky
-            version: 2023
+            version: 8.9
           - distro: awslinux
             version: 2023
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.pre-build.outputs.sha }}
+          ref: ${{ needs.pre-release.outputs.sha }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -121,7 +115,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./cppbuild/githubworkflows/${{ matrix.distro }}/Dockerfile
+          file: ./cppbuild/${{ matrix.distro }}/Dockerfile
           pull: true
           shm-size: 1g
           outputs: build/${{ matrix.distro }}/${{ matrix.version }}
@@ -133,15 +127,15 @@ jobs:
           oidc-provider-name: ${{ env.OIDC_PROVIDER }}
           oidc-audience: ${{ env.OIDC_AUDIENCE }}
       - name: Publish Build info With JFrog CLI
-        run: jf rt u *.tar.gz ${{ inputs.release && 'generic-local/' || 'generic-local/' }}
+        run: |
+          mv *.tar.gz aeron-${{ inputs.release-version }}-${{ inputs.release && '' || '-SNAPSHOT-' }}-${{ matrix.distro }}-${{ matrix.version }}.tar.gz
+          jf rt u *.tar.gz ${{ inputs.release && 'generic-local/' || 'generic-local/' }}
         working-directory: ./build/${{ matrix.distro }}/${{ matrix.version }}
 
-  post-build:
-    uses: ./.github/workflows/manage-version.yml
-    needs: [ java-build, c-build ]
+  post-release:
+    name: Update version
+    needs: release
+    uses: ./.github/workflows/post-release.yml
     with:
       release: ${{ inputs.release }}
-      pre-build: false
-      major-version: ${{ fromJson(inputs.major-version) }}
-      minor-version: ${{ fromJson(inputs.minor-version) }}
-      patch-version: ${{ fromJson(inputs.patch-version) }}
+      version: ${{ inputs.next-version }}
