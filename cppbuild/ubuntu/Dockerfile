@@ -12,7 +12,9 @@ RUN apt-get update && apt-get install -y \
     curl \
     gnupg \
     ca-certificates \
-    git
+    git \
+    doxygen \
+    python3
 
 RUN curl -s https://repos.azul.com/azul-repo.key | gpg --dearmor -o /usr/share/keyrings/azul.gpg && \
     echo "deb [signed-by=/usr/share/keyrings/azul.gpg] https://repos.azul.com/zulu/deb stable main" | tee /etc/apt/sources.list.d/zulu.list && \

@@ -11,7 +11,9 @@ RUN yum update && yum install -y https://cdn.azul.com/zulu/bin/zulu-repo-1.0.0-1
     libbsd-devel \
     libuuid-devel \
     git \
-    zulu-8
+    zulu-8 \
+    doxygen \
+    python3
 
 ENV JAVA_HOME=/usr/lib/jvm/zulu-8 \
     BUILD_JAVA_HOME=/usr/lib/jvm/zulu-8 \
