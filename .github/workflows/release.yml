@@ -128,13 +128,13 @@ jobs:
           oidc-audience: ${{ env.OIDC_AUDIENCE }}
       - name: Publish Build info With JFrog CLI
         run: |
-          mv *.tar.gz aeron-${{ inputs.release-version }}-${{ inputs.release && '' || '-SNAPSHOT-' }}-${{ matrix.distro }}-${{ matrix.version }}.tar.gz
+          mv *.tar.gz aeron-$(cat version.txt)-${{ matrix.distro }}-${{ matrix.version }}.tar.gz
           jf rt u *.tar.gz ${{ inputs.release && 'generic-local/' || 'generic-local/' }}
         working-directory: ./build/${{ matrix.distro }}/${{ matrix.version }}
 
   post-release:
     name: Update version
-    needs: release
+    needs: [ release-java, release-c ]
     uses: ./.github/workflows/post-release.yml
     with:
       release: ${{ inputs.release }}
