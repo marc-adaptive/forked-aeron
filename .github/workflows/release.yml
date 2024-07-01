@@ -98,8 +98,8 @@ jobs:
             version: bullseye
           - distro: debian
             version: bookworm
-#          - distro: rocky
-#            version: 8.9
+          - distro: rocky
+            version: 8.9
           - distro: awslinux
             version: 2023
     steps:
