@@ -54,5 +54,6 @@ jobs:
         name: Return current SHA and version
         run: |
           git rev-parse HEAD
+          cat version.txt
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           echo "version=$(cat version.txt)" >> "$GITHUB_OUTPUT"

@@ -128,7 +128,7 @@ jobs:
           oidc-audience: ${{ env.OIDC_AUDIENCE }}
       - name: Publish Build info With JFrog CLI
         run: |
-          mv *.tar.gz aeron-${{ needs.pre-release.outputs.versio }}-${{ matrix.distro }}-${{ matrix.version }}.tar.gz
+          mv *.tar.gz aeron-${{ needs.pre-release.outputs.version }}-${{ matrix.distro }}-${{ matrix.version }}.tar.gz
           jf rt u *.tar.gz ${{ inputs.release && 'generic-local/' || 'generic-local/' }}
         working-directory: ./build/${{ matrix.distro }}/${{ matrix.version }}
 
