@@ -2,20 +2,6 @@ name: Publish Artifacts and Release Documentation
 
 on:
   workflow_dispatch:
-    inputs:
-      release:
-        description: Is release? (Will create tag and update version)
-        required: true
-        default: false
-        type: boolean
-      release-version:
-        description: Released version (x.y.z)
-        required: true
-        type: string
-      next-version:
-        description: Next version (x.y.z)
-        required: true
-        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -37,20 +23,12 @@ jobs:
 #  codeql:
 #    uses: ./.github/workflows/codeql.yml
 
-  pre-release:
-    name: Update version, tag repo, and return sha
-#    needs: [ ci, ci-low-cadence, codeql ]
-    uses: ./.github/workflows/pre-release.yml
-    with:
-      release: ${{ inputs.release }}
-      version: ${{ inputs.release-version }}
-
   release-java:
     name: Release java artifacts
     permissions:
       contents: read
       packages: write
-    needs: pre-release
+#    needs: [ ci, ci-low-cadence, codeql]
     runs-on: [ self-hosted ]
     steps:
       - name: Checkout code
@@ -83,7 +61,7 @@ jobs:
       contents: read
       id-token: write
       packages: write
-    needs: pre-release
+#    needs: [ ci, ci-low-cadence, codeql]
     runs-on: [ self-hosted ]
     strategy:
       fail-fast: false
@@ -130,11 +108,3 @@ jobs:
           mv *.tar.gz aeron-${{ needs.pre-release.outputs.version }}-${{ matrix.distro }}-${{ matrix.version }}.tar.gz
           jf rt u *.tar.gz ${{ inputs.release && 'generic-local/' || 'generic-local/' }}
         working-directory: ./build/${{ matrix.distro }}/${{ matrix.version }}
-
-  post-release:
-    name: Update version
-    needs: [ release-java, release-c ]
-    uses: ./.github/workflows/post-release.yml
-    with:
-      release: ${{ inputs.release }}
-      version: ${{ inputs.next-version }}
