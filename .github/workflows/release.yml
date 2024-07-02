@@ -3,12 +3,8 @@ name: Publish Artifacts and Release Documentation
 on:
   workflow_dispatch:
     inputs:
-      run-ci:
-        description: Run ci and test workflows
-        required: true
-        type: boolean
       release:
-        description: Is release? (Will update tags and version)
+        description: Is release? (Will create tag and update version)
         required: true
         default: false
         type: boolean
@@ -32,17 +28,18 @@ env:
   OIDC_AUDIENCE: 'github-workflows'
 
 jobs:
-  run-release-ci:
-    name: Run ci workflows
-    uses: ./.github/workflows/pre-release-ci.yml
-    with:
-      run-ci: ${{ inputs.run-ci }}
-      run-ci-low-cadence: ${{ inputs.run-ci }}
-      codeql: ${{ inputs.run-ci }}
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  ci-low-cadence:
+    uses: ./.github/workflows/ci-low-cadence.yml
+
+  codeql:
+    uses: ./.github/workflows/codeql.yml
 
   pre-release:
     name: Update version, tag repo, and return sha
-    needs: run-release-ci
+    needs: [ ci, ci-low-cadence, codeql ]
     uses: ./.github/workflows/pre-release.yml
     with:
       release: ${{ inputs.release }}
@@ -51,7 +48,7 @@ jobs:
   release-java:
     name: Release java artifacts
     permissions:
-      contents: write
+      contents: read
       packages: write
     needs: pre-release
     runs-on: [ self-hosted ]
@@ -83,7 +80,7 @@ jobs:
   release-c:
     name: Release c artifacts
     permissions:
-      contents: write
+      contents: read
       id-token: write
       packages: write
     needs: pre-release
@@ -114,7 +111,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Build Artifacts Using Docker
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./cppbuild/${{ matrix.distro }}/Dockerfile
