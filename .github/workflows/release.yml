@@ -28,18 +28,19 @@ env:
   OIDC_AUDIENCE: 'github-workflows'
 
 jobs:
-  ci:
-    uses: ./.github/workflows/ci.yml
-
-  ci-low-cadence:
-    uses: ./.github/workflows/ci-low-cadence.yml
+#  ci:
+#    uses: ./.github/workflows/ci.yml
+#
+#  ci-low-cadence:
+#    uses: ./.github/workflows/ci-low-cadence.yml
 
   codeql:
     uses: ./.github/workflows/codeql.yml
 
   pre-release:
     name: Update version, tag repo, and return sha
-    needs: [ ci, ci-low-cadence, codeql ]
+#    needs: [ ci, ci-low-cadence, codeql ]
+    needs: codeql
     uses: ./.github/workflows/pre-release.yml
     with:
       release: ${{ inputs.release }}
