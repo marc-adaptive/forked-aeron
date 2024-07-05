@@ -23,6 +23,8 @@ concurrency:
 
 env:
   GRADLE_OPTS: '-Dorg.gradle.daemon=false -Dorg.gradle.java.installations.auto-detect=false -Dorg.gradle.warning.mode=fail'
+  AERON_REPO_PATH: 'generic-local/'
+  AERON_REPO_TEST_PATH: 'generic-local/'
 
 jobs:
 #  ci:
@@ -162,7 +164,7 @@ jobs:
       - name: Publish Build info With JFrog CLI
         run: |
           mv *.tar.gz aeron-${{ needs.pre-release.outputs.version }}-${{ matrix.distro }}-${{ matrix.version }}.tar.gz
-          jf rt u *.tar.gz ${{ inputs.release && 'generic-local/' || 'generic-local/' }}
+          jf rt u *.tar.gz ${{ env.AERON_REPO_PATH }}
         working-directory: ./build/${{ matrix.distro }}/${{ matrix.version }}
 
   post-release:
