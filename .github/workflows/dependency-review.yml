@@ -27,13 +27,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
-      - name: Dependency Review On Push
-        if: ${{ github.event_name == 'push' }}
-        uses: actions/dependency-review-action@v4
+      - uses: actions/setup-java@v4
         with:
-          base-ref: ${{ github.event.before }}
-          head-ref: ${{ github.event.after }}
-      - name: Dependency Review On Pull Request
-        if: ${{ github.event_name == 'pull_request' }}
+          distribution: zulu
+          java-version: 8
+      - name: Generate and submit dependency graph
+        uses: gradle/actions/dependency-submission@v3
+      - name: Dependency Review
         uses: actions/dependency-review-action@v4
 
