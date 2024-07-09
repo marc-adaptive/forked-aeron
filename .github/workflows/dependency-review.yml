@@ -35,4 +35,6 @@ jobs:
         uses: gradle/actions/dependency-submission@v3
       - name: Dependency Review
         uses: actions/dependency-review-action@v4
+        with:
+          config-file: dependency-graph-reports/dependency_review-dependency-review.json
 
