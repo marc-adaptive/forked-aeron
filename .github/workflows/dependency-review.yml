@@ -1,7 +1,7 @@
 name: Dependency Review
 
 on:
-  workflow_dispatch:
+  push:
 
 permissions:
   contents: read
@@ -18,8 +18,10 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
-      - name: Dependency Review
+      - name: Dependency Review On Push
+        if: ${{ github.event_name == 'push' }}
         uses: actions/dependency-review-action@v4
         with:
-          base-ref/head-ref: 2.1.0
+          base-ref: ${{ github.event.before }}
+          head-ref: ${{ github.event.after }}
 
