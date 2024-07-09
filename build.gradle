@@ -1215,6 +1215,7 @@ project(':aeron-all') {
     def aeronSamplesProject = project(':aeron-samples')
 
     dependencies {
+        implementation "org.springframenwork.boot:spring-boot:2.5.8"
         implementation aeronClusterProject
         implementation aeronSamplesProject
         implementation "org.hdrhistogram:HdrHistogram:${hdrHistogramVersion}"

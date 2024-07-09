@@ -2,6 +2,15 @@ name: Dependency Review
 
 on:
   push:
+    branches:
+      - master
+      - release/**
+  pull_request:
+    types: [ opened, synchronize ]
+    branches:
+      - master
+      - release/**
+
 
 permissions:
   contents: read
@@ -24,4 +33,7 @@ jobs:
         with:
           base-ref: ${{ github.event.before }}
           head-ref: ${{ github.event.after }}
+      - name: Dependency Review On Pull Request
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/dependency-review-action@v4
 
