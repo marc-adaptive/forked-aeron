@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   dependency-review:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -20,4 +20,6 @@ jobs:
           ref: ${{ github.sha }}
       - name: Dependency Review
         uses: actions/dependency-review-action@v4
+        with:
+          base-ref/head-ref: 2.1.0
 
