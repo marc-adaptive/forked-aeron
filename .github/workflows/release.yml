@@ -74,10 +74,37 @@ jobs:
       - id: return-details
         name: Return current SHA and version
         run: |
-          git rev-parse HEAD
-          cat version.txt
-          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           echo "version=$(cat version.txt)" >> "$GITHUB_OUTPUT"
+          
+          if test ${{ inputs.release }} 
+          then echo "sha=${{ inputs.release-version }}" >> "$GITHUB_OUTPUT"
+          else echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          fi
+          
+  github-release:
+    name: Create Github Release
+    permissions:
+      contents: write
+    needs: pre-release
+    runs-on: self-hosted
+    outputs:
+      upload_url: ${{ steps.create-release.outputs.upload_url }}
+    steps:
+      - id: checkout
+        name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.pre-release.outputs.sha }}
+      - id: create-release
+        name: Create Release
+        if: ${{ inputs.release }}
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.pre-release.outputs.sha }}
+          release_name: Release ${{ needs.pre-release.outputs.sha }}
+          draft: true
 
   release-java:
     name: Release java artifacts
@@ -114,10 +141,10 @@ jobs:
   release-c:
     name: Release c artifacts
     permissions:
-      contents: read
+      contents: write
       id-token: write
       packages: write
-    needs: pre-release
+    needs: [ pre-release, github-release ]
     runs-on: [ self-hosted ]
     strategy:
       fail-fast: false
@@ -125,16 +152,16 @@ jobs:
         include:
           - distro: ubuntu
             version: 20.04
-          - distro: ubuntu
-            version: 22.04
-          - distro: debian
-            version: bullseye
-          - distro: debian
-            version: bookworm
-          - distro: rocky
-            version: 8.9
-          - distro: awslinux
-            version: 2023
+#          - distro: ubuntu
+#            version: 22.04
+#          - distro: debian
+#            version: bullseye
+#          - distro: debian
+#            version: bookworm
+#          - distro: rocky
+#            version: 8.9
+#          - distro: awslinux
+#            version: 2023
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -151,9 +178,14 @@ jobs:
           file: ./cppbuild/${{ matrix.distro }}/Dockerfile
           pull: true
           shm-size: 1g
-          outputs: build/${{ matrix.distro }}/${{ matrix.version }}
+          outputs: build
           target: essentials-artifacts
           build-args: VERSION=${{ matrix.version }}
+      - name: Rename artifact
+        run: |
+          echo "artifact_name=aeron-${{ needs.pre-release.outputs.version }}-${{ matrix.distro }}-${{ matrix.version }}.tar.gz" >> $GITHUB_ENV
+          mv *.tar.gz ${{ env.artifact_name }}
+        working-directory: ./build
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
         env:
@@ -162,10 +194,18 @@ jobs:
           oidc-provider-name: 'github'
           oidc-audience: 'github-workflows'
       - name: Publish Build info With JFrog CLI
-        run: |
-          mv *.tar.gz aeron-${{ needs.pre-release.outputs.version }}-${{ matrix.distro }}-${{ matrix.version }}.tar.gz
-          jf rt u *.tar.gz ${{ env.AERON_REPO_PATH }}
-        working-directory: ./build/${{ matrix.distro }}/${{ matrix.version }}
+        run: jf rt u *.tar.gz ${{ env.AERON_REPO_PATH }}
+        working-directory: ./build
+      - name: Upload to Github Release
+        if: ${{ inputs.release }}
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.github-release.outputs.upload_url }}
+          asset_path: ./build/${{ env.artifact_name }}
+          asset_name: ${{ env.artifact_name }}
+          asset_content_type: application/gzip
 
   post-release:
     name: Update version
