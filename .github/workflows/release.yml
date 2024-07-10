@@ -74,7 +74,7 @@ jobs:
         name: Return current ref
         run: |          
           if test ${{ inputs.release }} 
-          then echo "sha=${{ inputs.release-version }}" >> "$GITHUB_OUTPUT"
+          then echo "sha=refs/tags/${{ inputs.release-version }}" >> "$GITHUB_OUTPUT"
           else echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           fi
           
@@ -108,7 +108,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    needs: github-release
+    needs: [ pre-release, github-release ]
     runs-on: [ self-hosted ]
     steps:
       - name: Checkout code
@@ -141,7 +141,7 @@ jobs:
       contents: write
       id-token: write
       packages: write
-    needs: github-release
+    needs: [ pre-release, github-release ]
     runs-on: [ self-hosted ]
     strategy:
       fail-fast: false
