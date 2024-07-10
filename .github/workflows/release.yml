@@ -44,7 +44,6 @@ jobs:
     runs-on: self-hosted
     outputs:
       sha: ${{ steps.return-details.outputs.sha }}
-      version: ${{ steps.return-details.outputs.version }}
     steps:
       - id: checkout
         name: Checkout
@@ -72,10 +71,8 @@ jobs:
           git tag ${{ inputs.release-version }}
           git push origin refs/tags/${{ inputs.release-version }}
       - id: return-details
-        name: Return current SHA and version
-        run: |
-          echo "version=$(cat version.txt)" >> "$GITHUB_OUTPUT"
-          
+        name: Return current ref
+        run: |          
           if test ${{ inputs.release }} 
           then echo "sha=${{ inputs.release-version }}" >> "$GITHUB_OUTPUT"
           else echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
@@ -183,20 +180,9 @@ jobs:
           build-args: VERSION=${{ matrix.version }}
       - name: Rename artifact
         run: |
-          artifact_name=aeron-${{ needs.pre-release.outputs.version }}-${{ matrix.distro }}-${{ matrix.version }}.tar.gz
+          artifact_name=aeron-$(cat version.txt)-${{ matrix.distro }}-${{ matrix.version }}.tar.gz
           echo "artifact_name=$artifact_name" >> $GITHUB_ENV
-          mv *.tar.gz $artifact_name
-        working-directory: ./build
-      - name: Setup JFrog CLI
-        uses: jfrog/setup-jfrog-cli@v4
-        env:
-          JF_URL: 'http://localhost:8081'
-        with:
-          oidc-provider-name: 'github'
-          oidc-audience: 'github-workflows'
-      - name: Publish Build info With JFrog CLI
-        run: jf rt u *.tar.gz ${{ env.AERON_REPO_PATH }}
-        working-directory: ./build
+          mv ./build/*.tar.gz ./build/$artifact_name
       - name: Upload to Github Release
         if: ${{ inputs.release }}
         uses: actions/upload-release-asset@v1
@@ -207,6 +193,16 @@ jobs:
           asset_path: ./build/${{ env.artifact_name }}
           asset_name: ${{ env.artifact_name }}
           asset_content_type: application/gzip
+      - name: Setup JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v4
+        env:
+          JF_URL: 'http://localhost:8081'
+        with:
+          oidc-provider-name: 'github'
+          oidc-audience: 'github-workflows'
+      - name: Publish Build info With JFrog CLI
+        run: jf rt u *.tar.gz ${{ env.AERON_REPO_PATH }}
+        working-directory: ./build
 
   post-release:
     name: Update version
