@@ -183,8 +183,9 @@ jobs:
           build-args: VERSION=${{ matrix.version }}
       - name: Rename artifact
         run: |
-          echo "artifact_name=aeron-${{ needs.pre-release.outputs.version }}-${{ matrix.distro }}-${{ matrix.version }}.tar.gz" >> $GITHUB_ENV
-          mv *.tar.gz ${{ env.artifact_name }}
+          artifact_name=aeron-${{ needs.pre-release.outputs.version }}-${{ matrix.distro }}-${{ matrix.version }}.tar.gz
+          echo "artifact_name=artifact_name" >> $GITHUB_ENV
+          mv *.tar.gz artifact_name
         working-directory: ./build
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
