@@ -1,21 +1,10 @@
-name: Publish Artifacts and Release Documentation
+name: Release
 
 on:
   workflow_dispatch:
-    inputs:
-      release:
-        description: Is release? (Will create tag and update version)
-        required: true
-        default: false
-        type: boolean
-      release-version:
-        description: Released version (x.y.z)
-        required: true
-        type: string
-      next-version:
-        description: Next version (x.y.z)
-        required: true
-        type: string
+  push:
+    tags:
+      - "*.*.*"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -23,8 +12,7 @@ concurrency:
 
 env:
   GRADLE_OPTS: '-Dorg.gradle.daemon=false -Dorg.gradle.java.installations.auto-detect=false -Dorg.gradle.warning.mode=fail'
-  AERON_REPO_PATH: 'generic-local/'
-  AERON_REPO_TEST_PATH: 'generic-local/'
+  aeronRepoPath: 'generic-local/'
 
 jobs:
 #  ci:
@@ -36,53 +24,11 @@ jobs:
 #  codeql:
 #    uses: ./.github/workflows/codeql.yml
 
-  pre-release:
-    name: Update version, tag repo, and return sha
-    permissions:
-      contents: write
-#    needs: [ ci, ci-low-cadence, codeql ]
-    runs-on: self-hosted
-    outputs:
-      sha: ${{ steps.return-details.outputs.sha }}
-    steps:
-      - id: checkout
-        name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref }}
-      - id: validate
-        name: Validate no new commits
-        run: |
-          current_sha=$(git rev-parse HEAD)
-          if test $current_sha != '${{ github.sha }}'
-          then exit 1
-          fi
-      - id: tag-version
-        if: ${{ inputs.release }}
-        name: Update version and tag repo
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@aeron.io"
-          echo ${{ inputs.release-version }} > version.txt
-          git add version.txt
-          git status
-          git commit -m "${{ inputs.release-version }} version update."
-          git push
-          git tag ${{ inputs.release-version }}
-          git push origin refs/tags/${{ inputs.release-version }}
-      - id: return-details
-        name: Return current ref
-        run: |          
-          if test ${{ inputs.release }} 
-          then echo "sha=refs/tags/${{ inputs.release-version }}" >> "$GITHUB_OUTPUT"
-          else echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-          fi
-          
-  github-release:
+  release-github:
     name: Create Github Release
     permissions:
       contents: write
-    needs: pre-release
+#    needs: [ ci, ci-low-cadence, codeql ]
     runs-on: self-hosted
     outputs:
       upload_url: ${{ steps.create-release.outputs.upload_url }}
@@ -91,16 +37,15 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.pre-release.outputs.sha }}
+          ref: ${{ github.ref }}
       - id: create-release
         name: Create Release
-        if: ${{ inputs.release }}
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ needs.pre-release.outputs.sha }}
-          release_name: Release ${{ needs.pre-release.outputs.sha }}
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
           draft: true
 
   release-java:
@@ -108,13 +53,13 @@ jobs:
     permissions:
       contents: read
       packages: write
-    needs: [ pre-release, github-release ]
+    needs: release-github
     runs-on: [ self-hosted ]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.pre-release.outputs.sha }}
+          ref: ${{ github.ref }}
       - name: Setup java
         uses: actions/setup-java@v4
         with:
@@ -132,8 +77,8 @@ jobs:
           ORG_GRADLE_PROJECT_ossrhPassword: ${{ secrets.ossrhPassword }}
           ORG_GRADLE_PROJECT_signingKey: ${{ secrets.signingKey }}
           ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.signingPassword }}
-#      - name: Build with Gradle
-#        run: ./gradlew tutorialPublish -Paeron.ci.apiKey=${{ secrets.WIKI_PAGE_TOKEN }} --stacktrace
+      - name: Publish tutorial with Gradle
+        run: ./gradlew tutorialPublish -Paeron.ci.apiKey=${{ secrets.WIKI_PAGE_TOKEN }} --stacktrace
 
   release-c:
     name: Release c artifacts
@@ -141,7 +86,7 @@ jobs:
       contents: write
       id-token: write
       packages: write
-    needs: [ pre-release, github-release ]
+    needs: release-github
     runs-on: [ self-hosted ]
     strategy:
       fail-fast: false
@@ -149,21 +94,21 @@ jobs:
         include:
           - distro: ubuntu
             version: 20.04
-#          - distro: ubuntu
-#            version: 22.04
-#          - distro: debian
-#            version: bullseye
-#          - distro: debian
-#            version: bookworm
-#          - distro: rocky
-#            version: 8.9
-#          - distro: awslinux
-#            version: 2023
+          - distro: ubuntu
+            version: 22.04
+          - distro: debian
+            version: bullseye
+          - distro: debian
+            version: bookworm
+          - distro: rocky
+            version: 8.9
+          - distro: awslinux
+            version: 2023
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.pre-release.outputs.sha }}
+          ref: ${{ github.ref }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -180,11 +125,10 @@ jobs:
           build-args: VERSION=${{ matrix.version }}
       - name: Rename artifact
         run: |
-          artifact_name=aeron-$(cat version.txt)-${{ matrix.distro }}-${{ matrix.version }}.tar.gz
+          artifact_name=aeron-$(cat version.txt)-${{ matrix.distro }}-${{ matrix.version }}-x86_64.tar.gz
           echo "artifact_name=$artifact_name" >> $GITHUB_ENV
           mv ./build/*.tar.gz ./build/$artifact_name
       - name: Upload to Github Release
-        if: ${{ inputs.release }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -201,27 +145,5 @@ jobs:
           oidc-provider-name: 'github'
           oidc-audience: 'github-workflows'
       - name: Publish Build info With JFrog CLI
-        run: jf rt u *.tar.gz ${{ env.AERON_REPO_PATH }}
+        run: jf rt u *.tar.gz ${{ env.aeronRepoPath }}
         working-directory: ./build
-
-  post-release:
-    name: Update version
-    permissions:
-      contents: write
-    needs: [ release-java, release-c ]
-    runs-on: self-hosted
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref }}
-      - name: Commit snapshot version to current branch
-        if: ${{ inputs.release }}
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@aeron.io"
-          echo ${{ inputs.next-version }}-SNAPSHOT > version.txt
-          git add version.txt
-          git status
-          git commit -m "${{ inputs.next-version }}-SNAPSHOT version update."
-          git push
