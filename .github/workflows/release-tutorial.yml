@@ -36,5 +36,5 @@ jobs:
           echo "BUILD_JAVA_HOME=${JAVA_HOME}" >> $GITHUB_ENV
           echo "BUILD_JAVA_VERSION=8" >> $GITHUB_ENV
       - name: Publish tutorial with Gradle
-        run: ./gradlew tutorialPublish -Paeron.ci.apiKey=${{ secrets.WIKI_PAGE_TOKEN }} --stacktrace
+        run: ./gradlew tutorialPublish -Paeron.ci.apiKey=${{ secrets.GITHUB_TOKEN }} --stacktrace
 
