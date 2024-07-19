@@ -331,7 +331,7 @@ jobs:
           pull: true
           shm-size: 1g
           outputs: type=local,dest=build
-          target: essentials-build
+          target: essentials-artifacts
           build-args: VERSION=${{ matrix.version }}
 
   cpp-clang-ubuntu-2004-build:
