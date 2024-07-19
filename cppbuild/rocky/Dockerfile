@@ -1,4 +1,4 @@
-ARG VERSION="8"
+ARG VERSION="8.9"
 FROM rockylinux:${VERSION} as builder
 
 ARG USER_ID="1000"
@@ -28,12 +28,6 @@ ENV JAVA_HOME=/usr/lib/jvm/zulu-8 \
 
 USER athena
 WORKDIR /opt/aeron
-
-FROM builder as essentials-entrypoint
-ENTRYPOINT scl enable "gcc-toolset-${GCC_VERSION}" -- cppbuild/cppbuild --c-warnings-as-errors --cxx-warnings-as-errors --package
-
-FROM builder as extended-builder
-
 ADD --chown=athena:athena . /opt/aeron
 
 RUN git config --global user.email "build@aeron.io"
