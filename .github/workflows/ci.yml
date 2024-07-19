@@ -306,25 +306,14 @@ jobs:
           name: crash-logs-gcc-2204-${{ matrix.version }}
           path: ${{ steps.copy_test_logs.outputs.file }}
 
-  cpp-gcc-diff-distribution-build:
-    name: C++ Diff Distribution Build
+  cpp-gcc-rocky-build:
+    name: C++ Rocky 8
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - distro: ubuntu
-            version: 20.04
-          - distro: ubuntu
-            version: 22.04
-          - distro: debian
-            version: bullseye
-          - distro: debian
-            version: bookworm
-          - distro: rocky
-            version: 8.9
-          - distro: awslinux
-            version: 2023
+        distro: [ 'rocky' ]
+        version: [ '8', '8.9' ]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

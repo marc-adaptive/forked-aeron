@@ -35,7 +35,7 @@ RUN git config --global user.name "Athena (Build Master)"
 RUN git config --global core.autocrlf false
 RUN git update-index -q --refresh
 
-FROM extended-builder as essentials-build
+FROM builder as essentials-build
 RUN scl enable "gcc-toolset-${GCC_VERSION}" -- cppbuild/cppbuild --c-warnings-as-errors --cxx-warnings-as-errors --package
 
 FROM scratch AS essentials-artifacts
