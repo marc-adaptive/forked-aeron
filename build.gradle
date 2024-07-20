@@ -1217,7 +1217,6 @@ project(':aeron-all') {
     def aeronSamplesProject = project(':aeron-samples')
 
     dependencies {
-        implementation "org.apache.logging.log4j:log4j-core:2.13.1"
         implementation aeronClusterProject
         implementation aeronSamplesProject
         implementation "org.hdrhistogram:HdrHistogram:${hdrHistogramVersion}"
