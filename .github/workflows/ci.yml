@@ -312,7 +312,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [ '8', '8.9' ]
+        include:
+          - version: 8.9
+            gcc-version: 10
+          - version: 9.3
+            gcc-version: 13
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -331,7 +335,9 @@ jobs:
           shm-size: 1g
           outputs: type=local,dest=build
           target: essentials-artifacts
-          build-args: VERSION=${{ matrix.version }}
+          build-args: |
+            VERSION=${{ matrix.version }}
+            GCC_VERSION=${{ matrix.gcc-version }}
 
   cpp-clang-ubuntu-2004-build:
     name: C++ Clang ${{ matrix.version }} (Ubuntu 20.04)
