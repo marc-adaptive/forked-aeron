@@ -312,7 +312,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        distro: [ 'rocky' ]
         version: [ '8', '8.9' ]
     steps:
       - name: Checkout code
@@ -327,7 +326,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./cppbuild/${{ matrix.distro }}/Dockerfile
+          file: ./cppbuild/rocky/Dockerfile
           pull: true
           shm-size: 1g
           outputs: type=local,dest=build
