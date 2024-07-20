@@ -48,35 +48,35 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: true
 
-  release-java:
-    name: Release java artifacts
-    permissions:
-      contents: read
-      packages: write
-    needs: github-release
-    runs-on: [ self-hosted ]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref }}
-      - name: Setup java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: 8
-      - name: Setup BUILD_JAVA_HOME & BUILD_JAVA_VERSION
-        run: |
-          java -Xinternalversion
-          echo "BUILD_JAVA_HOME=${JAVA_HOME}" >> $GITHUB_ENV
-          echo "BUILD_JAVA_VERSION=8" >> $GITHUB_ENV
-      - name: Publish with Gradle
-        run: ./gradlew publish
-        env:
-          ORG_GRADLE_PROJECT_ossrhUsername: ${{ secrets.ossrhUsername }}
-          ORG_GRADLE_PROJECT_ossrhPassword: ${{ secrets.ossrhPassword }}
-          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.signingKey }}
-          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.signingPassword }}
+#  release-java:
+#    name: Release java artifacts
+#    permissions:
+#      contents: read
+#      packages: write
+#    needs: github-release
+#    runs-on: [ self-hosted ]
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v4
+#        with:
+#          ref: ${{ github.ref }}
+#      - name: Setup java
+#        uses: actions/setup-java@v4
+#        with:
+#          distribution: 'zulu'
+#          java-version: 8
+#      - name: Setup BUILD_JAVA_HOME & BUILD_JAVA_VERSION
+#        run: |
+#          java -Xinternalversion
+#          echo "BUILD_JAVA_HOME=${JAVA_HOME}" >> $GITHUB_ENV
+#          echo "BUILD_JAVA_VERSION=8" >> $GITHUB_ENV
+#      - name: Publish with Gradle
+#        run: ./gradlew publish
+#        env:
+#          ORG_GRADLE_PROJECT_ossrhUsername: ${{ secrets.ossrhUsername }}
+#          ORG_GRADLE_PROJECT_ossrhPassword: ${{ secrets.ossrhPassword }}
+#          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.signingKey }}
+#          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.signingPassword }}
 
   release-c:
     name: Release c artifacts
@@ -171,8 +171,6 @@ jobs:
           build-args: |
             VERSION=${{ matrix.version }}
             GCC_VERSION=${{ matrix.gcc-version }}
-            USER_ID=$(id -u)
-            GROUP_ID=$(id -g)
       - name: Rename artifact
         run: |
           artifact_name=aeron-$(cat version.txt)-${{ matrix.distro }}-${{ matrix.version }}-GNU-${{ matrix.gcc-version }}-x86_64.tar.gz
@@ -187,13 +185,13 @@ jobs:
           asset_path: ./build/${{ env.artifact_name }}
           asset_name: ${{ env.artifact_name }}
           asset_content_type: application/gzip
-      - name: Setup JFrog CLI
-        uses: jfrog/setup-jfrog-cli@v4
-        env:
-          JF_URL: 'http://localhost:8081'
-        with:
-          oidc-provider-name: 'github'
-          oidc-audience: 'github-workflows'
-      - name: Publish Build info With JFrog CLI
-        run: jf rt u *.tar.gz ${{ env.aeronRepoPath }}
-        working-directory: ./build
+#      - name: Setup JFrog CLI
+#        uses: jfrog/setup-jfrog-cli@v4
+#        env:
+#          JF_URL: 'http://localhost:8081'
+#        with:
+#          oidc-provider-name: 'github'
+#          oidc-audience: 'github-workflows'
+#      - name: Publish Build info With JFrog CLI
+#        run: jf rt u *.tar.gz ${{ env.aeronRepoPath }}
+#        working-directory: ./build
