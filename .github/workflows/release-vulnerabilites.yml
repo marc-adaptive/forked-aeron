@@ -28,10 +28,7 @@ jobs:
           minor_version=$(echo $version | cut --delimiter=. --field=2)
           patch_version=$(echo $version | cut --delimiter=. --field=3)
           
-          echo My current version is $version
-          
-          echo Git command is $(git tag --list '*.*.*' --sort=version:refname)
-
+          git fetch --tags
           for tag in $(git tag --list '*.*.*' --sort=version:refname); do
             echo Current tag is $tag
           
