@@ -12,14 +12,14 @@ jobs:
     name: Find prior tag
     runs-on: ubuntu-latest
     outputs:
-      previous-tag: refs/tags/${{ steps.find-prior-release.previous_tag }}
+      previous-tag: refs/tags/${{ steps.find-previous-release.outputs.previous-tag }}
     steps:
       - id: checkout
         name: Checkout sources
         uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
-      - id: find-prior-release
+      - id: find-previous-release
         name: Find prior release
         run: |
           version_maybe_snapshot=$(cat version.txt)
@@ -44,7 +44,7 @@ jobs:
           done
 
           echo My version is $version and my previous tag is $previous_tag
-          echo "previous_tag=$previous_tag" >> $GITHUB_OUTPUT
+          echo "previous-tag=$previous_tag" >> "$GITHUB_OUTPUT"
 
   base-dependency-submission:
     name: Submit dependencies for prior release
