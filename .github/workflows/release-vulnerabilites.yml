@@ -31,6 +31,8 @@ jobs:
           echo My current version is $version
 
           for tag in $(git tag --list '*.*.*' --sort=version:refname); do
+            echo Current tag is $tag
+          
             current_major_version=$(echo $tag | cut --delimiter=. --field=1)
             current_minor_version=$(echo $tag | cut --delimiter=. --field=2)
             current_patch_version=$(echo $tag | cut --delimiter=. --field=3)
