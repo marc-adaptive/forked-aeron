@@ -27,6 +27,8 @@ jobs:
           major_version=$(echo $version | cut --delimiter=. --field=1)
           minor_version=$(echo $version | cut --delimiter=. --field=2)
           patch_version=$(echo $version | cut --delimiter=. --field=3)
+          
+          echo My current version is $version
 
           for tag in $(git tag --list '*.*.*' --sort=version:refname); do
             current_major_version=$(echo $tag | cut --delimiter=. --field=1)
@@ -37,8 +39,11 @@ jobs:
                [[ $current_major_version -eq $major_version && $current_minor_version -gt $minor_version ]] || \
                [[ $current_major_version -eq $major_version && $current_minor_version -eq $minor_version && $current_patch_version -gt $patch_version ]] || \
                [[ $current_major_version -eq $major_version && $current_minor_version -eq $minor_version && $current_patch_version -eq $patch_version ]]
-              then break
-              else previous_tag=$tag
+              then 
+                echo $tag
+                break
+              else 
+                previous_tag=$tag
             fi
           done
 
