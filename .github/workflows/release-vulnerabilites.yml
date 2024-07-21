@@ -90,5 +90,5 @@ jobs:
       - name: 'Dependency Review'
         uses: actions/dependency-review-action@v4
         with:
-          base-ref: ${{ needs.find-previous-tag.outputs.previous-tag }}
-          head-ref: ${{ github.ref }}
+          base_ref: ${{ needs.find-previous-tag.outputs.previous-tag }}
+          head_ref: ${{ github.ref }}
