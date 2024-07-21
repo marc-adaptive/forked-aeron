@@ -29,9 +29,7 @@ jobs:
           patch_version=$(echo $version | cut --delimiter=. --field=3)
           
           git fetch --tags
-          for tag in $(git tag --list '*.*.*' --sort=version:refname); do
-            echo Current tag is $tag
-          
+          for tag in $(git tag --list '*.*.*' --sort=version:refname); do          
             current_major_version=$(echo $tag | cut --delimiter=. --field=1)
             current_minor_version=$(echo $tag | cut --delimiter=. --field=2)
             current_patch_version=$(echo $tag | cut --delimiter=. --field=3)
