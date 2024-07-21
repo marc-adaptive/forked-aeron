@@ -12,7 +12,7 @@ jobs:
     name: Find prior tag
     runs-on: ubuntu-latest
     outputs:
-      previous-tag: refs/tags/${{ steps.find-prior-release.previous-tag }}
+      previous-tag: refs/tags/${{ steps.find-prior-release.previous_tag }}
     steps:
       - id: checkout
         name: Checkout sources
@@ -39,12 +39,12 @@ jobs:
                [[ $current_major_version -eq $major_version && $current_minor_version -eq $minor_version && $current_patch_version -gt $patch_version ]] || \
                [[ $current_major_version -eq $major_version && $current_minor_version -eq $minor_version && $current_patch_version -eq $patch_version ]]
               then break
-              else previous-tag=$tag
+              else previous_tag=$tag
             fi
           done
 
-          echo My version is $version and my previous tag is $previous-tag
-          echo "previous-tag=$previous-tag" >> $GITHUB_OUTPUT
+          echo My version is $version and my previous tag is $previous_tag
+          echo "previous_tag=$previous_tag" >> $GITHUB_OUTPUT
 
   base-dependency-submission:
     name: Submit dependencies for prior release
