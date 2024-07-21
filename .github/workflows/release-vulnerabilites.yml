@@ -29,6 +29,8 @@ jobs:
           patch_version=$(echo $version | cut --delimiter=. --field=3)
           
           echo My current version is $version
+          
+          echo $(git tag --list '*.*.*' --sort=version:refname)
 
           for tag in $(git tag --list '*.*.*' --sort=version:refname); do
             echo Current tag is $tag
