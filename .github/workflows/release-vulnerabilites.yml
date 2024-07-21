@@ -85,10 +85,10 @@ jobs:
 
   dependency-review:
     runs-on: ubuntu-latest
-    needs: [ base-dependency-submission, head-dependency-submission ]
+    needs: [ find-previous-tag, base-dependency-submission, head-dependency-submission ]
     steps:
       - name: 'Dependency Review'
         uses: actions/dependency-review-action@v4
         with:
-          base_ref: ${{ needs.find-previous-tag.outputs.previous-tag }}
-          head_ref: ${{ github.ref }}
+          base-ref: ${{ needs.find-previous-tag.outputs.previous-tag }}
+          head-ref: ${{ github.ref }}
