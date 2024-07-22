@@ -29,7 +29,7 @@ jobs:
     permissions:
       contents: write
 #    needs: [ ci, ci-low-cadence, codeql ]
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     outputs:
       upload_url: ${{ steps.create-release.outputs.upload_url }}
     steps:
