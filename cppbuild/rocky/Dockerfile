@@ -15,10 +15,10 @@ RUN yum update -y && yum install -y https://cdn.azul.com/zulu/bin/zulu-repo-1.0.
     git \
     findutils \
     openssl-devel \
-    zulu-8
+    zulu8-jdk
 
-ENV JAVA_HOME=/usr/lib/jvm/zulu-8 \
-    BUILD_JAVA_HOME=/usr/lib/jvm/zulu-8 \
+ENV JAVA_HOME=/usr/lib/jvm/zulu8 \
+    BUILD_JAVA_HOME=/usr/lib/jvm/zulu8 \
     BUILD_JAVA_VERSION=8 \
     GRADLE_OPTS="-Dorg.gradle.daemon=false -Dorg.gradle.java.installations.auto-detect=false -Dorg.gradle.warning.mode=fail" \
     GCC_VERSION=${GCC_VERSION}

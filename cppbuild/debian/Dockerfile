@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y \
 
 RUN curl -s https://repos.azul.com/azul-repo.key | gpg --dearmor -o /usr/share/keyrings/azul.gpg && \
     echo "deb [signed-by=/usr/share/keyrings/azul.gpg] https://repos.azul.com/zulu/deb stable main" | tee /etc/apt/sources.list.d/zulu.list && \
-    apt-get update && apt-get install -y zulu-8
+    apt-get update && apt-get install -y zulu8-jdk
 
 ENV JAVA_HOME=/usr/lib/jvm/zulu8 \
     BUILD_JAVA_HOME=/usr/lib/jvm/zulu8 \
