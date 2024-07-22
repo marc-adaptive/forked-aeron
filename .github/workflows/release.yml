@@ -92,64 +92,20 @@ jobs:
         include:
           - distro: ubuntu
             version: 20.04
-            gcc-version: 7
-          - distro: ubuntu
-            version: 20.04
-            gcc-version: 8
-          - distro: ubuntu
-            version: 20.04
-            gcc-version: 9
-          - distro: ubuntu
-            version: 20.04
-            gcc-version: 10
           - distro: ubuntu
             version: 22.04
-            gcc-version: 9
-          - distro: ubuntu
-            version: 22.04
-            gcc-version: 10
-          - distro: ubuntu
-            version: 22.04
-            gcc-version: 11
-          - distro: ubuntu
-            version: 22.04
-            gcc-version: 12
           - distro: debian
             version: bullseye
-            gcc-version: 9
-          - distro: debian
-            version: bullseye
-            gcc-version: 10
           - distro: debian
             version: bookworm
-            gcc-version: 11
-          - distro: debian
-            version: bookworm
-            gcc-version: 12
-          - distro: rocky
-            version: 8.9
-            gcc-version: 9
           - distro: rocky
             version: 8.9
             gcc-version: 10
-          - distro: rocky
-            version: 8.9
-            gcc-version: 11
-          - distro: rocky
-            version: 8.9
-            gcc-version: 12
-          - distro: rocky
-            version: 8.9
-            gcc-version: 13
-          - distro: rocky
-            version: 9.3
-            gcc-version: 12
           - distro: rocky
             version: 9.3
             gcc-version: 13
           - distro: awslinux
             version: 2023
-            gcc-version: 11
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -173,7 +129,7 @@ jobs:
             GCC_VERSION=${{ matrix.gcc-version }}
       - name: Rename artifact
         run: |
-          artifact_name=aeron-$(cat version.txt)-${{ matrix.distro }}-${{ matrix.version }}-GNU-${{ matrix.gcc-version }}-x86_64.tar.gz
+          artifact_name=aeron-$(cat version.txt)-${{ matrix.distro }}-${{ matrix.version }}-x86_64.tar.gz
           echo "artifact_name=$artifact_name" >> $GITHUB_ENV
           mv ./build/*.tar.gz ./build/$artifact_name
       - name: Upload to Github Release
@@ -188,10 +144,10 @@ jobs:
 #      - name: Setup JFrog CLI
 #        uses: jfrog/setup-jfrog-cli@v4
 #        env:
-#          JF_URL: 'http://localhost:8081'
+#          JF_URL: ${{ vars.JFROG_OIDC_URL }}
 #        with:
-#          oidc-provider-name: 'github'
-#          oidc-audience: 'github-workflows'
+#          oidc-provider-name: ${{ vars.JFROG_OIDC_PROVIDER }}
+#          oidc-audience: ${{ vars.JFROG_OIDC_AUDIENCE }}
 #      - name: Publish Build info With JFrog CLI
-#        run: jf rt u *.tar.gz ${{ env.aeronRepoPath }}
+#        run: jf rt u *.tar.gz ${{ vars.JFROG_AERON_OSS_REPO_NAME }}
 #        working-directory: ./build
