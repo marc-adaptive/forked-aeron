@@ -92,12 +92,16 @@ jobs:
         include:
           - distro: ubuntu
             version: 20.04
+            gcc-version: default
           - distro: ubuntu
             version: 22.04
+            gcc-version: default
           - distro: debian
             version: bullseye
+            gcc-version: default
           - distro: debian
             version: bookworm
+            gcc-version: default
           - distro: rocky
             version: 8.9
             gcc-version: 10
@@ -106,6 +110,7 @@ jobs:
             gcc-version: 13
           - distro: awslinux
             version: 2023
+            gcc-version: default
     steps:
       - name: Checkout
         uses: actions/checkout@v4
