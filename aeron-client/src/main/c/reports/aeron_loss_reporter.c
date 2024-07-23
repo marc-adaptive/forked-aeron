@@ -88,9 +88,9 @@ void aeron_loss_reporter_record_observation(
     {
         uint8_t *ptr = reporter->buffer + offset;
         aeron_loss_reporter_entry_t *entry = (aeron_loss_reporter_entry_t *)ptr;
-#if defined(__clang__) && defined(AERON_CPU_ARM)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-but-set-variable"
+#if defined(AERON_CPU_ARM)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 #endif
         int64_t dest;
 
@@ -108,8 +108,8 @@ void aeron_loss_reporter_record_observation(
 #endif
     }
 }
-#if defined(__clang__) && defined(AERON_CPU_ARM)
-#pragma clang diagnostic pop
+#if defined(AERON_CPU_ARM)
+#pragma GCC diagnostic pop
 #endif
 
 int aeron_loss_reporter_resolve_filename(const char *directory, char *filename_buffer, size_t filename_buffer_length)

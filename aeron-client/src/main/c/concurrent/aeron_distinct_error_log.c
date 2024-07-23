@@ -195,9 +195,9 @@ int aeron_distinct_error_log_record(aeron_distinct_error_log_t *log, int error_c
     aeron_mutex_unlock(&log->mutex);
 
     aeron_error_log_entry_t *entry = (aeron_error_log_entry_t *)(log->buffer + entry_offset);
-#if defined(__clang__) && defined(AERON_CPU_ARM)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-but-set-variable"
+#if defined(AERON_CPU_ARM)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 #endif
     int32_t dest;
     AERON_GET_AND_ADD_INT32(dest, entry->observation_count, 1);
@@ -205,8 +205,8 @@ int aeron_distinct_error_log_record(aeron_distinct_error_log_t *log, int error_c
 
     return 0;
 }
-#if defined(__clang__) && defined(AERON_CPU_ARM)
-#pragma clang diagnostic pop
+#if defined(AERON_CPU_ARM)
+#pragma GCC diagnostic pop
 #endif
 
 bool aeron_error_log_exists(const uint8_t *buffer, size_t buffer_size)
