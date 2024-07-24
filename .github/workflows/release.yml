@@ -15,8 +15,8 @@ env:
   aeronRepoPath: 'generic-local/'
 
 jobs:
-#  ci:
-#    uses: ./.github/workflows/ci.yml
+  ci:
+    uses: ./.github/workflows/ci.yml
 #
 #  ci-low-cadence:
 #    uses: ./.github/workflows/ci-low-cadence.yml
@@ -28,6 +28,7 @@ jobs:
     name: Create Github Release
     permissions:
       contents: write
+    needs: ci
 #    needs: [ ci, ci-low-cadence, codeql ]
     runs-on: ubuntu-latest
     outputs:
@@ -92,31 +93,24 @@ jobs:
         include:
           - distro: ubuntu
             version: 20.04
-            platform: amd64
             gcc-version: default
           - distro: ubuntu
             version: 22.04
-            platform: amd64
             gcc-version: default
           - distro: debian
             version: bullseye
-            platform: amd64
             gcc-version: default
           - distro: debian
             version: bookworm
-            platform: amd64
             gcc-version: default
           - distro: rocky
             version: 8.9
-            platform: amd64
             gcc-version: 10
           - distro: rocky
             version: 9.3
-            platform: amd64
             gcc-version: 13
           - distro: awslinux
             version: 2023
-            platform: amd64
             gcc-version: default
     steps:
       - name: Checkout

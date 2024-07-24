@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+if [ -z ${GCC_VERSION} ];
+then
+  echo "No GCC version provided!";
+  exit 1;
+else
+  echo "GCC_VERSION=${GCC_VERSION}"
+fi
+
+if [ -z ${DISTRO} ];
+then
+  echo "No DISTRO provided!";
+  exit 1;
+else
+  echo "DISTRO=${DISTRO}"
+fi
+
+if [ -z ${VERSION} ];
+then
+  echo "No VERSION provided!";
+  exit 1;
+else
+  echo "DISTRO=${VERSION}"
+fi
+
+SOURCE_DIR="$(pwd)"
+
+docker build --tag ${DISTRO}-${VERSION}-aeron \
+  --build-arg VERSION="${VERSION}" \
+  --build-arg USER_ID="$(id -u)" \
+  --build-arg GROUP_ID="$(id -g)" \
+  --build-arg GCC_VERSION="${GCC_VERSION}" \
+  --target essentials-test \
+  "${SOURCE_DIR}/cppbuild/${DISTRO}"
+
+docker run --rm --shm-size=1G --network host \
+  --volume="${SOURCE_DIR}":/opt/aeron \
+  --volume="$(realpath ~/.gradle)":/home/athena/.gradle \
+  ${DISTRO}-${VERSION}-aeron
