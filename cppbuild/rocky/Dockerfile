@@ -38,7 +38,7 @@ RUN git config --global core.autocrlf false
 RUN git update-index -q --refresh
 
 FROM builder as essentials-build
-RUN scl enable "gcc-toolset-${GCC_VERSION}" -- cppbuild/cppbuild --c-warnings-as-errors --cxx-warnings-as-errors --package
+RUN scl enable "gcc-toolset-${GCC_VERSION}" -- cppbuild/cppbuild --c-warnings-as-errors --cxx-warnings-as-errors --package --no-tests --no-unit-tests --no-system-tests
 
 FROM scratch AS essentials-artifacts
 COPY --from=essentials-build /opt/aeron/cppbuild/Release/*.tar.gz /
