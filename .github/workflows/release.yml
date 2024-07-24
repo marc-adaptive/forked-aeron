@@ -95,56 +95,28 @@ jobs:
             platform: amd64
             gcc-version: default
           - distro: ubuntu
-            version: 20.04
-            platform: arm64
-            gcc-version: default
-          - distro: ubuntu
             version: 22.04
             platform: amd64
-            gcc-version: default
-          - distro: ubuntu
-            version: 22.04
-            platform: arm64
             gcc-version: default
           - distro: debian
             version: bullseye
             platform: amd64
             gcc-version: default
           - distro: debian
-            version: bullseye
-            platform: arm64
-            gcc-version: default
-          - distro: debian
             version: bookworm
             platform: amd64
-            gcc-version: default
-          - distro: debian
-            version: bookworm
-            platform: arm64
             gcc-version: default
           - distro: rocky
             version: 8.9
             platform: amd64
             gcc-version: 10
           - distro: rocky
-            version: 8.9
-            platform: arm64
-            gcc-version: 10
-          - distro: rocky
             version: 9.3
             platform: amd64
-            gcc-version: 13
-          - distro: rocky
-            version: 9.3
-            platform: arm64
             gcc-version: 13
           - distro: awslinux
             version: 2023
             platform: amd64
-            gcc-version: default
-          - distro: awslinux
-            version: 2023
-            platform: arm64
             gcc-version: default
     steps:
       - name: Checkout
@@ -163,7 +135,6 @@ jobs:
           pull: true
           shm-size: 1g
           outputs: type=local,dest=build
-          platforms: linux/${{ matrix.platform }}
           target: essentials-artifacts
           build-args: |
             VERSION=${{ matrix.version }}
