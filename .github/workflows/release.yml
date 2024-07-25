@@ -2,9 +2,9 @@ name: Release
 
 on:
   workflow_dispatch:
-#  push:
-#    tags:
-#      - "*.*.*"
+  push:
+    tags:
+      - "*.*.*"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -23,6 +23,16 @@ jobs:
 #
 #  codeql:
 #    uses: ./.github/workflows/codeql.yml
+#
+#  vulnerabilites:
+#    name: Check vulnerabilites on master branch
+#    permissions:
+#      contents: read
+#    runs-on: ubuntu-latest
+#    steps:
+#    - name: Check vulnerabilites
+#      run: |
+#        exit $(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" -X GET -F severity=critical,high -F state=open /repos/marc-adaptive/forked-aeron/dependabot/alerts | jq length)
 
   github-release:
     name: Create Github Release
